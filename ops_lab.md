@@ -841,4 +841,6 @@ This playbook is relatively simple, with a single `with_items` loop. What sort o
 
 ##### 4.3 - Summary
 
+This project takes multiple complex developer tools and integrates into a single automated workflow. Applications are built, tested, deployed, and then humans can verify eveything passes to their satisfaction before the final button is pushed to promote the application to the next level. Every one of those tools is running in a container inside your OpenShift cluster. 
+
 #### 5.0 - Q&A and Wrap-Up
