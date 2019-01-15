@@ -524,7 +524,7 @@ Inside the `image-uploader` project you'll use the `oc new-app` command to deplo
     Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
      'oc expose svc/app-cli'
     Run 'oc status' to view your app.
-                  ```
+```
 
 The build process should only take a couple of minutes. Once the output of `oc get pods` shows your app-cli pod in a Ready and Running state, you're (almost) good to go.
 
