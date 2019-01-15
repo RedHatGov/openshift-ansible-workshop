@@ -493,7 +493,8 @@ Let's make double-sure that we're using our `image-uploader` project.
 
 ```
 # oc project image-uploader
-                  ```
+
+```
 
 Inside the `image-uploader` project you'll use the `oc new-app` command to deploy your new application using S2I.
 
