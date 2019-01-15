@@ -533,7 +533,7 @@ The build process should only take a couple of minutes. Once the output of `oc g
 NAME              READY     STATUS      RESTARTS   AGE
 app-cli-1-build   0/1       Completed   0          2m
 app-cli-1-tthhf   1/1       Running     0          2m
-                  ```
+```
 
 We talked briefly about services and pods and all of the constructs inside OpenShift during the presentation part of this lab. You can see in the output above that you created a service as part of your new application, along with other needed objects. Let's take a look at the app-cli service using the command line.
 
@@ -552,13 +552,14 @@ Port:              8443-tcp  8443/TCP
 TargetPort:        8443/TCP
 Endpoints:         10.130.0.36:8443
 Session Affinity:  None
-Events:            ```
+Events:            
+```
 
 Before we can get to our new application, we have to expose the service externally. When you deploy an application using the CLI, an external route is not automatically created. To create a route, use the `oc expose` command.
 
 ```# oc expose svc/app-cli
 route "app-cli" exposed
-                  ```
+```
 
 **What is `svc`?!**  
 
@@ -569,7 +570,7 @@ To see and confirm our route, use the `oc get routes` command.
 ```# oc get routes
 NAME      HOST/PORT                                             PATH      SERVICES   PORT       TERMINATION   WILDCARD
 app-cli   app-cli-image-uploader.student1.boston.redhatgov.io             app-cli    8080-tcp                 None
-                  ```
+```
 
 If you browse to your newly created route, you should see the Image Uploader application, ready for use.
 
@@ -583,7 +584,7 @@ Scaling your `app-cli` application is accomplished with a single `oc scale` comm
 
 ```# oc scale dc/app-cli --replicas=3
 deploymentconfig.apps.openshift.io "app-cli" scaled
-                  ```
+```
 
 Because your second application node doesn't have the custom container image for `app-cli` already cached, it may take a few seconds for the initial pod to be created on that node. To confirm everything is running, use the `oc get pods` command. The additional `-o wide` provides additional output, including the internal IP address of the pod and the node where it's deployed.
 
@@ -593,7 +594,7 @@ app-cli-1-26fgz   1/1       Running     0          9s        10.131.0.6    ip-17
 app-cli-1-bgt75   1/1       Running     0          4m        10.130.0.41   ip-172-16-245-111.ec2.internal
 app-cli-1-build   0/1       Completed   0          21m       10.130.0.34   ip-172-16-245-111.ec2.internal
 app-cli-1-tthhf   1/1       Running     0          21m       10.130.0.36   ip-172-16-245-111.ec2.internal
-                  ```
+```
 
 Using a single command, you just scaled your application from 1 instance to 3 instances on 2 servers. In a matter of seconds. Compare that to what your application scaling process is using VMs or bare metal systems; or even things like Amazon ECS or just Docker. It's pretty amazing. Next, let's do the same thing using the web interface.
 
@@ -647,7 +648,7 @@ At a fundamental level, OpenShift creates an OVS bridge and attaches a TUN and V
 
 ```# ovs-vsctl list-br
 br0
-                ```
+```
 
 This lists the OVS bridges on the host. To see the interfaces within the bridge, run the following command. Here you can see the `vxlan`, `tun`, and `veth` interfaces within the bridge.
 
@@ -660,7 +661,7 @@ veth77b9379f
 veth9406531e
 veth97389395
 vxlan0
-                ```
+```
 
 Logically, the networking configuration on an OpenShift node looks like the graphic below.
 
@@ -678,7 +679,7 @@ NAME                       READY     STATUS    RESTARTS   AGE
 docker-registry-1-77rmv    1/1       Running   0          2d
 registry-console-1-n7kbk   1/1       Running   0          2d
 router-1-mwb89             1/1       Running   0          2d <--- router pod running HAProxy
-                ```
+```
 
 If you know the name of a pod, you can us `oc rsh` to connect to it remotely. This is doing some fun magic using `ssh` and `nsenter` under the covers to provide a connection to the proper node inside the proper namespaces for the pod. Looking in the `haproxy.config` file for references to `app-cli` gives displays your router configuration for that application. `Ctrl-D` will exit out of your `rsh` session.
 
@@ -688,7 +689,7 @@ backend be_http:image-uploader:app-cli
   server pod:app-cli-1-tthhf:app-cli:10.130.0.36:8080 10.130.0.36:8080 cookie 91b8f12aa1ca5b82e34e730715b58254 weight 256 check inter 5000ms
   server pod:app-cli-1-bgt75:app-cli:10.130.0.41:8080 10.130.0.41:8080 cookie 0f411f181edfdfb13c0c0d1b562f5efd weight 256 check inter 5000ms
   server pod:app-cli-1-26fgz:app-cli:10.131.0.6:8080 10.131.0.6:8080 cookie 67b4bd5bb54b037c5b37c8acadcfe833 weight 256 check inter 5000ms
-                ```
+```
 
 If you use the `oc get pods` command for the Image Uploader project and limit its output for the app-cli application, you can see the IP addresses in HAProxy match the pods for the application.
 
@@ -697,7 +698,7 @@ NAME              READY     STATUS    RESTARTS   AGE       IP            NODE
 app-cli-1-26fgz   1/1       Running   0          3h        10.131.0.6    ip-172-16-50-98.ec2.internal
 app-cli-1-bgt75   1/1       Running   0          3h        10.130.0.41   ip-172-16-245-111.ec2.internal
 app-cli-1-tthhf   1/1       Running   0          3h        10.130.0.36   ip-172-16-245-111.ec2.internal
-                ```
+```
 
 To confirm HAProxy is automatically updated, let's scale `app-cli` back down to 1 pod and re-check the router configuration.
 
@@ -711,7 +712,7 @@ app-cli-1-tthhf   1/1       Running   0          3h        10.130.0.36   ip-172-
 # oc exec router-1-mwb89 grep app-cli haproxy.config
 backend be_http:image-uploader:app-cli
   server pod:app-cli-1-tthhf:app-cli:10.130.0.36:8080 10.130.0.36:8080 cookie 91b8f12aa1ca5b82e34e730715b58254 weight 256 check inter 5000ms
-                ```
+```
 
 We were able to confirm that our HAProxy configuration updates automatically when applications are updated.
 
@@ -729,7 +730,7 @@ Your entire OpenShift cluster was deployed using Ansible. The inventory used to 
 
 ```ansible-playook /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml
 ansible-playook /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml
-              ```
+```
 
 The deployment process takes 30-40 minutes to complete, depending on the size of your cluster. To save that time, we've got you covered and have already deployed your OpenShift cluster. In fact, all lab environments were provisioned using a single ansible playbook from [another ansible playbook that incorporates the playbooks that deploy OpenShift](https://github.com/jduncan-rva/linklight).
 
@@ -749,7 +750,7 @@ aws               container-runtime   openshift-checks       openshift-hosted   
 azure             deploy_cluster.yml  openshift-descheduler  openshift-loadbalancer  openshift-monitor-availability  openshift-prometheus             prerequisites.yml
 byo               gcp                 openshift-etcd         openshift-logging       openshift-monitoring            openshift-provisioners           README.md
 cluster-operator  init                openshift-glusterfs    openshift-management    openshift-nfs                   openshift-service-catalog        redeploy-certificates.yml
-                ```
+```
 ##### 3.3 - Summary
 
 In section 1, we talked about Ansible fundamentals. In section 2, we worked through the OpenShift architecture and how your cluster can be managed using Ansible.
@@ -781,7 +782,7 @@ On your control node, execute the following code:
 ```oc new-project dev --display-name="Tasks - Dev"
 oc new-project stage --display-name="Tasks - Stage"
 oc new-project cicd --display-name="CI/CD"
-              ```
+```
 
 This will create three projects in your OpenShift cluster.
 
@@ -793,16 +794,18 @@ This will create three projects in your OpenShift cluster.
 
 Next, you need to give the CI/CD project permission to exexute tasks in the Dev and Stage projects.
 
-```oc policy add-role-to-group edit system:serviceaccounts:cicd -n dev
+```
+oc policy add-role-to-group edit system:serviceaccounts:cicd -n dev
 oc policy add-role-to-group edit system:serviceaccounts:cicd -n stage
-              ```
+```
 
 4.1.3 - Deploying your workflow
 
 With your projects created, you're ready to deploy the demo and trigger the workflow
 
-```oc new-app -n cicd -f cicd-template.yaml --param=DEPLOY_CHE=true
-              ```
+```
+oc new-app -n cicd -f cicd-template.yaml --param=DEPLOY_CHE=true
+```
 
 This process doesn't take much time for a single application, but it doesn't scale well, it's not repeatable, and it relies on the person executing it knowing the commands, and the specific information about the situation. In the next section, we'll accomplish the same thing with a simple Ansible playbook, executed from your bastion host.
 
@@ -832,7 +835,7 @@ tasks:
   - stage
 - name: Start application deployment to trigger CI/CD workflow
   command: oc new-app -n cicd -f cicd-template.yaml --param=DEPLOY_CHE=true
-              ```
+```
 
 This playbook is relatively simple, with a single `with_items` loop. What sort of additional enhancements can you think of to make this playbook more powerful to deploy workflows inside OpenShift?
 
