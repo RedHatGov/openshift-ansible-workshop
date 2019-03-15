@@ -768,7 +768,7 @@ In the final section of our workshop, we'll take everything we've been discussin
 *   Runs unit tests for the application
 *   Runs code analysis using Sonarqube
 *   Builds a Wildfly container image
-*   Deplous the app into a dev project and runs integration tests
+*   Deploys the app into a dev project and runs integration tests
 *   Builds a human break into the OpenShift UI to confirm before it promotes the application to the stage project
 
 This is a complete analog to a modern CI/CD workflow, implemented 100% within OpenShift. First, we'll need to create some projects for your CI/CD workflow to use. The content can be found on Github at [https://github.com/siamaksade/openshift-cd-demo](https://github.com/siamaksade/openshift-cd-demo). This content has been downloaded already to your OpenShift control node at `/root/cicd-demo`.
